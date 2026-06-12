@@ -63,6 +63,17 @@ function startGame() {
     gameRunning = true;
     gameOver = false;
     gamePaused = false;
+    score = 0;
+    scoreDisplay.textContent = score;
+    snake = [{ x: 10, y: 10 }];
+    dx = 1;
+    dy = 0;
+    nextDx = 1;
+    nextDy = 0;
+    food = {
+        x: Math.floor(Math.random() * tileCount),
+        y: Math.floor(Math.random() * tileCount)
+    };
     startBtn.style.display = 'none';
     pauseBtn.style.display = 'inline-block';
     resetBtn.style.display = 'inline-block';
@@ -146,6 +157,8 @@ function endGame() {
     gameRunning = false;
     gameOver = true;
     pauseBtn.style.display = 'none';
+    startBtn.style.display = 'inline-block';
+    startBtn.textContent = 'Play Again';
     gameStatusDisplay.textContent = `💀 Game Over! Final Score: ${score}`;
 
     // Update high score
