@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
     <meta name="theme-color" content="#667eea">
     <meta name="description" content="Play the classic Snake Game with progressive difficulty. Control the snake, eat food, and beat your high score!">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,43 +16,45 @@
 </head>
 <body>
     <div class="container">
-        <h1>🐍 Snake Game</h1>
+        <h1>🐍 Snake</h1>
         
         <div class="info">
             <div class="score-box">
-                <p>Score</p>
-                <p id="score">0</p>
+                <p class="score-label">Score</p>
+                <p class="score-value" id="score">0</p>
             </div>
             <div class="score-box">
-                <p>High Score</p>
-                <p id="highScore">0</p>
+                <p class="score-label">High</p>
+                <p class="score-value" id="highScore">0</p>
             </div>
         </div>
 
-        <canvas id="gameCanvas" width="400" height="400"></canvas>
+        <canvas id="gameCanvas" width="300" height="300"></canvas>
 
         <div class="controls">
-            <p id="gameStatus">Use Arrow Keys or WASD to move</p>
-            <button id="startBtn" class="btn btn-primary">Start Game</button>
+            <p id="gameStatus">Use Arrow Keys or WASD</p>
+            <button id="startBtn" class="btn btn-primary">Start</button>
             <button id="pauseBtn" class="btn btn-secondary" style="display: none;">Pause</button>
             <button id="resetBtn" class="btn btn-danger" style="display: none;">Reset</button>
         </div>
 
-        <div class="instructions">
-            <h3>📋 How to Play:</h3>
-            <ul>
-                <li>Use <strong>Arrow Keys</strong> or <strong>WASD</strong> to move the snake</li>
-                <li>Eat the <strong>red food</strong> to grow and gain points</li>
-                <li>Don't hit the walls or yourself!</li>
-                <li>Each food eaten = 10 points</li>
-                <li>Speed increases with your score!</li>
-            </ul>
+        <div class="install-prompt" id="installPrompt" style="display: none;">
+            <p>📱 Install App</p>
+            <div class="install-buttons">
+                <button id="installBtn" class="btn btn-install">Install</button>
+                <button id="dismissBtn" class="btn btn-dismiss">✕</button>
+            </div>
         </div>
 
-        <div class="install-prompt" id="installPrompt" style="display: none;">
-            <p>📱 Install Snake Game on your device!</p>
-            <button id="installBtn" class="btn btn-primary">Install App</button>
-            <button id="dismissBtn" class="btn btn-secondary">Not Now</button>
+        <button id="infoBtn" class="info-btn">ℹ️</button>
+        <div class="instructions" id="instructions" style="display: none;">
+            <h3>How to Play:</h3>
+            <ul>
+                <li>Arrow Keys or WASD to move</li>
+                <li>Eat red food to grow</li>
+                <li>Don't hit walls or yourself</li>
+                <li>Speed increases with score!</li>
+            </ul>
         </div>
     </div>
 
@@ -62,7 +64,7 @@
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js')
                 .then(registration => {
-                    console.log('Service Worker registered successfully:', registration);
+                    console.log('Service Worker registered');
                 })
                 .catch(error => {
                     console.log('Service Worker registration failed:', error);
@@ -74,30 +76,63 @@
         const installPrompt = document.getElementById('installPrompt');
         const installBtn = document.getElementById('installBtn');
         const dismissBtn = document.getElementById('dismissBtn');
+        const infoBtn = document.getElementById('infoBtn');
+        const instructions = document.getElementById('instructions');
 
+        // Listen for beforeinstallprompt
         window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('beforeinstallprompt fired');
             e.preventDefault();
             deferredPrompt = e;
-            installPrompt.style.display = 'block';
+            // Show install prompt after 2 seconds
+            setTimeout(() => {
+                if (installPrompt) {
+                    installPrompt.style.display = 'block';
+                }
+            }, 2000);
         });
 
-        installBtn.addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                console.log(`User response to the install prompt: ${outcome}`);
+        if (installBtn) {
+            installBtn.addEventListener('click', async () => {
+                console.log('Install button clicked');
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    console.log(`User response: ${outcome}`);
+                    deferredPrompt = null;
+                    installPrompt.style.display = 'none';
+                }
+            });
+        }
+
+        if (dismissBtn) {
+            dismissBtn.addEventListener('click', () => {
+                if (installPrompt) {
+                    installPrompt.style.display = 'none';
+                }
                 deferredPrompt = null;
-                installPrompt.style.display = 'none';
-            }
-        });
+            });
+        }
 
-        dismissBtn.addEventListener('click', () => {
-            installPrompt.style.display = 'none';
-        });
+        // Info button toggle
+        if (infoBtn) {
+            infoBtn.addEventListener('click', () => {
+                if (instructions.style.display === 'none') {
+                    instructions.style.display = 'block';
+                    infoBtn.textContent = '✕';
+                } else {
+                    instructions.style.display = 'none';
+                    infoBtn.textContent = 'ℹ️';
+                }
+            });
+        }
 
         window.addEventListener('appinstalled', () => {
             console.log('PWA was installed');
-            installPrompt.style.display = 'none';
+            if (installPrompt) {
+                installPrompt.style.display = 'none';
+            }
+            deferredPrompt = null;
         });
     </script>
 </body>
