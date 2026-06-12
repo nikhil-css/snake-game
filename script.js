@@ -181,6 +181,39 @@ function endGame() {
     }
 }
 
+function drawSnakeHead(x, y) {
+    const padding = 2;
+    const headSize = gridSize - 2 * padding;
+    
+    // Draw head with bright yellow/gold color
+    ctx.fillStyle = '#FFD700';
+    ctx.fillRect(x * gridSize + padding, y * gridSize + padding, headSize, headSize);
+    
+    // Add border to head
+    ctx.strokeStyle = '#FFA500';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x * gridSize + padding, y * gridSize + padding, headSize, headSize);
+    
+    // Draw eyes based on direction
+    const eyeSize = 3;
+    const eyePadding = 5;
+    ctx.fillStyle = '#000000';
+    
+    if (dx === 1) { // Moving right
+        ctx.fillRect(x * gridSize + eyePadding + 5, y * gridSize + eyePadding, eyeSize, eyeSize);
+        ctx.fillRect(x * gridSize + eyePadding + 5, y * gridSize + gridSize - eyePadding - eyeSize, eyeSize, eyeSize);
+    } else if (dx === -1) { // Moving left
+        ctx.fillRect(x * gridSize + gridSize - eyePadding - 8, y * gridSize + eyePadding, eyeSize, eyeSize);
+        ctx.fillRect(x * gridSize + gridSize - eyePadding - 8, y * gridSize + gridSize - eyePadding - eyeSize, eyeSize, eyeSize);
+    } else if (dy === -1) { // Moving up
+        ctx.fillRect(x * gridSize + eyePadding, y * gridSize + eyePadding + 5, eyeSize, eyeSize);
+        ctx.fillRect(x * gridSize + gridSize - eyePadding - eyeSize, y * gridSize + eyePadding + 5, eyeSize, eyeSize);
+    } else if (dy === 1) { // Moving down
+        ctx.fillRect(x * gridSize + eyePadding, y * gridSize + gridSize - eyePadding - 8, eyeSize, eyeSize);
+        ctx.fillRect(x * gridSize + gridSize - eyePadding - eyeSize, y * gridSize + gridSize - eyePadding - 8, eyeSize, eyeSize);
+    }
+}
+
 function draw() {
     // Clear canvas
     ctx.fillStyle = '#1a1a1a';
@@ -204,16 +237,32 @@ function draw() {
     // Draw snake
     snake.forEach((segment, index) => {
         if (index === 0) {
-            ctx.fillStyle = '#00ff00';
+            // Draw head with special styling
+            drawSnakeHead(segment.x, segment.y);
         } else {
-            ctx.fillStyle = '#00cc00';
+            // Draw body segments in green
+            const gradient = ctx.createLinearGradient(
+                segment.x * gridSize, segment.y * gridSize,
+                segment.x * gridSize + gridSize, segment.y * gridSize + gridSize
+            );
+            gradient.addColorStop(0, '#00ff00');
+            gradient.addColorStop(1, '#00aa00');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(segment.x * gridSize + 1, segment.y * gridSize + 1, gridSize - 2, gridSize - 2);
         }
-        ctx.fillRect(segment.x * gridSize + 1, segment.y * gridSize + 1, gridSize - 2, gridSize - 2);
     });
 
     // Draw food
     ctx.fillStyle = '#ff0000';
-    ctx.fillRect(food.x * gridSize + 1, food.y * gridSize + 1, gridSize - 2, gridSize - 2);
+    ctx.beginPath();
+    ctx.arc(food.x * gridSize + gridSize / 2, food.y * gridSize + gridSize / 2, gridSize / 2 - 2, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Add shine to food
+    ctx.fillStyle = '#ff6666';
+    ctx.beginPath();
+    ctx.arc(food.x * gridSize + gridSize / 2 - 3, food.y * gridSize + gridSize / 2 - 3, 3, 0, Math.PI * 2);
+    ctx.fill();
 }
 
 // Initial draw
