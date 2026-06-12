@@ -30,6 +30,9 @@ let nextDy = 0;
 let gameRunning = false;
 let gamePaused = false;
 let gameOver = false;
+let gameSpeed = 100; // Initial speed in milliseconds
+const initialSpeed = 100;
+const minSpeed = 30; // Minimum speed (maximum game speed)
 
 // Event listeners
 startBtn.addEventListener('click', startGame);
@@ -58,12 +61,19 @@ function handleKeyPress(e) {
     }
 }
 
+function updateGameSpeed() {
+    // Speed increases by 1ms for every 10 points
+    // Score 0 = 100ms, Score 10 = 99ms, Score 100 = 90ms, Score 700 = 30ms (max speed)
+    gameSpeed = Math.max(minSpeed, initialSpeed - Math.floor(score / 10));
+}
+
 function startGame() {
     if (gameRunning) return;
     gameRunning = true;
     gameOver = false;
     gamePaused = false;
     score = 0;
+    gameSpeed = initialSpeed;
     scoreDisplay.textContent = score;
     snake = [{ x: 10, y: 10 }];
     dx = 1;
@@ -101,6 +111,7 @@ function resetGame() {
     nextDx = 0;
     nextDy = 0;
     score = 0;
+    gameSpeed = initialSpeed;
     scoreDisplay.textContent = score;
     gameRunning = false;
     gameOver = false;
@@ -141,6 +152,7 @@ function gameLoop() {
     if (head.x === food.x && head.y === food.y) {
         score += 10;
         scoreDisplay.textContent = score;
+        updateGameSpeed(); // Update speed based on new score
         food = {
             x: Math.floor(Math.random() * tileCount),
             y: Math.floor(Math.random() * tileCount)
@@ -150,7 +162,7 @@ function gameLoop() {
     }
 
     draw();
-    setTimeout(gameLoop, 100);
+    setTimeout(gameLoop, gameSpeed); // Use dynamic gameSpeed instead of fixed 100
 }
 
 function endGame() {
